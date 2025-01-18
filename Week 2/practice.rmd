@@ -1,0 +1,113 @@
+---
+title: "Practice Document"
+author: "Rajat Mahesh Gupta"
+date: "`r Sys.Date()`"
+output: html_document
+---
+## Guided Example : 
+If we roll three dice, what is the probability that their total is 8? We could count all the possibilities,
+or we could get an approximate answer via simulation:
+```{r }
+# roll d dice; find P(total = k)
+probtotk <- function(d,k,nreps) {
+    count <- 0
+    # do the experiment nreps times -- like doing nreps notebook lines
+    for (rep in 1:nreps) {
+        sum <- 0
+        #roll d dice and find their sum 
+        for (j in 1:d) sum <- sum + roll()
+        if (sum == k) count <- count + 1
+    }
+    return (count/nreps)
+}
+# simulate roll of one die; the possible return values are 1,2,3,4,5,6,
+# all equally likely
+# roll <- function() return(sample (1:6,1))
+# example
+probtotk(3,8,100000)
+```
+
+
+The example below is the first and easiest attempt
+```{r version 1 : dice total}
+# roll d dice; find P(total = 8)
+# d : num of dice
+# k : total
+# nrep : num of repetitions
+
+pOfTotalk <- function(d, k, nrep) {
+    count <- 0
+
+    # do the experiment nrep times
+
+    for (i in 1:nrep) {
+        total <- sum(sample(1:6, d, replace = TRUE))
+        if (total == k) {
+            count <- count + 1
+        }
+    }
+    return(count/nrep)
+}
+
+# simulate the roll of one dice 
+pOfTotalk(3, 8, 100000000)
+```
+
+```{r version 2 : dice total}
+# roll d dice; find P(total = 8)
+# d : num of dice
+# k : total
+# nrep : num of repetitions
+
+roll <- function(d) return(sample(1:6, d, replace = TRUE))
+
+pOfTotalk <- function(n, k, nrep) {
+    # do the experiment nrep times
+    sums <- replicate(nrep, sum(roll(n)))
+    return(mean(sums == k))
+}
+
+pOfTotalk(3, 8, 10000)
+```
+# Question 1
+### Example: Dice Problem
+Suppose three fair dice are rolled. We wish to find the approximate probability that the first die
+shows fewer than 3 dots, given that the total number of dots for the 3 dice is more than 8, using
+simulation.
+
+```{r Dice conditional probability problem}
+
+roll <- function(d) return(sample(1:6, d, replace = TRUE))
+
+# r : number of dots on the first dice
+# d : number of dice
+# total : total sum from d dices
+# nreps : number of repetitions
+condionalDice <- function(r, d, total, nreps){
+    count <- 0
+    count2 <- 0
+    for (i in 1:nreps){
+        dice <- roll(d)
+        if (sum(dice) > total){
+            count <- count + 1
+            if(dice[1] < r){
+                count2 <- count2 + 1
+            }
+        }
+    }
+    return(count2/count)
+}
+
+condionalDice(3, 3, 8, 100000)
+```
+
+## ALOHA Problem
+```{r, cache=TRUE}
+sim <- function(p, q, nreps) {
+    countx2eq2 <- 0
+    countx2eq1 <- 0
+    countx1eq2 <- 0
+    
+    
+}
+```

@@ -1,0 +1,96 @@
+---
+title: "Homework 3 - Problem B"
+author: "Rajat Mahesh Gupta"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+Here you will develop "d,p,q,r" functions for a certain distribution
+family, in the sense of e.g. Sec. 4.4.1.
+
+- We'll call the family "accum" for "accumulate." The setting is
+that of repeatedly rolling a pair of dice. The random variable
+X is the number of rolls needed to achieve an accumulated total
+of at least k dots. So for instance the support of X ranges
+from ceiling(k/12) to ceiling(k/2). This is a one-parameter
+family.
+- The call forms will be
+```
+daccum(i,k)
+paccum(i,k)
+qaccum(m,k)
+raccum(nreps,k)
+```
+
+- The 'd', 'p' and 'q' functions must be exact, i.e. not computed
+via simulation, but a recursive call is fine. Finding 'p' and
+'q' from 'd' is fine.
+
+- For 'q', note the comment following (4.31).
+
+```{r, cache=TRUE}
+# Probability mass function for the accum distribution
+daccum <- function(i, k) {
+  if (i < ceiling(k / 12) || i > ceiling(k / 2)) {
+    return(0)
+  }
+  if (i == ceiling(k / 12)) {
+    return(1)
+  }
+  return(daccum(i - 1, k) * (1 - paccum(i - 1, k)))
+}
+
+# Cumulative distribution function for the accum distribution
+paccum <- function(i, k) {
+  if (i < ceiling(k / 12)) {
+    return(0)
+  }
+  if (i >= ceiling(k / 2)) {
+    return(1)
+  }
+  return(sum(sapply(ceiling(k / 12):i, function(j) daccum(j, k))))
+}
+
+# Quantile function for the accum distribution
+qaccum <- function(m, k) {
+  p <- m / 100
+  for (i in ceiling(k / 12):ceiling(k / 2)) {
+    if (paccum(i, k) >= p) {
+      return(i)
+    }
+  }
+  return(ceiling(k / 2))
+}
+
+# Random generation for the accum distribution
+raccum <- function(nreps, k) {
+  sapply(1:nreps, function(x) {
+    total <- 0
+    rolls <- 0
+    while (total < k) {
+      total <- total + sample(1:6, 1) + sample(1:6, 1)
+      rolls <- rolls + 1
+    }
+    return(rolls)
+  })
+}
+```
+
+```{r, include=FALSE}
+k <- 20
+# Calculate probability of needing exactly 3 rolls
+prob_3 <- daccum(3, 20)
+cat(paste("P(X=3):", prob_3))
+
+# Calculate probability of needing 3 or fewer rolls
+cum_prob_3 <- paccum(3, 20)
+cat(paste("P(X≤3):", cum_prob_3))
+
+# Find number of rolls needed for 90th percentile
+q90 <- qaccum(90, 20)
+cat(paste("90th percentile:", q90))
+
+# Generate 5 random samples
+samples <- raccum(5, 20)
+cat("Random samples:")
+cat(samples)
+```

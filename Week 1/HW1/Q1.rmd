@@ -1,0 +1,46 @@
+---
+title: "ECS 132 HW 1"
+author: "Rajat Mahesh Gupta"
+output: pdf_document
+---
+
+# Question 1
+#### You are playing a version of the roulette game, where the pockets are from 0 to 16 and even numbers are red and odd numbers are black (0 is green). You spin 3 times and add up the values you see. What is the probability that you get a total of 18 given on the first spin you spin a 5? What about an 8?
+```{r}
+set.seed(123) # Set seed for reproducibility
+
+# Number of repetitions for the simulation
+nreps <- 100000000
+
+# Function to simulate the probability of total being 18 given the first spin is fixed
+simulate_probability <- function(first_spin, total_sum, nreps) {
+  # Counter for successful trials where total equals total_sum
+  success_count <- 0
+
+  # Loop through nreps trials
+  for (i in 1:nreps) {
+    # Randomly sample two spins from the range 0 to 16
+    other_spins <- sample(0:16, 2, replace = TRUE)
+
+    # Calculate the sum of the spins
+    total <- first_spin + sum(other_spins)
+
+    # Check if the total matches the target total_sum
+    if (total == total_sum) {
+      success_count <- success_count + 1
+    }
+  }
+
+  # Calculate the probability as the fraction of successful trials
+  probability <- success_count / nreps
+  return(probability)
+}
+
+# Calculate the probability for first spin being 5 and total being 18
+prob_5 <- simulate_probability(5, 18, nreps)
+cat("Probability of total 18 given first spin is 5:", prob_5, "\n")
+
+# Calculate the probability for first spin being 8 and total being 18
+prob_8 <- simulate_probability(8, 18, nreps)
+cat("Probability of total 18 given first spin is 8:", prob_8, "\n")
+```

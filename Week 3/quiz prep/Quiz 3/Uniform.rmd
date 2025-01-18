@@ -1,0 +1,24 @@
+---
+title: "Quiz 4"
+author: "Rajat Mahesh Gupta"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+#### Problem 4: The number of daily shoppers at target is uniformly distributed between 20 and 30+y.
+
+#### How many shoppers should the target expect to see tomorrow?
+
+In other words, what is the expected value of the number of shoppers at Target tomorrow?
+
+```{r, cache=TRUE}
+set.seed(123)
+n_days <- 100000000
+
+# Simulate the number of shoppers each day from a uniform distribution U(20, 42)
+shoppers <- sample(20:42, n_days, replace = TRUE)
+
+# Calculate the average (expected) number of shoppers based on the simulation
+simulated_expected_shoppers <- mean(shoppers)
+cat("Simulated Expected Number of Shoppers:", simulated_expected_shoppers, "\n")
+```

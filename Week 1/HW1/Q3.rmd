@@ -1,0 +1,95 @@
+---
+title: "ECS 132 HW 1"
+author: "Rajat Mahesh Gupta"
+output: pdf_document
+---
+
+# Question 3
+#### Suppose we deal a 5-card hand from a regular 52-card deck. Which is larger, P(exactly 2 10's) or P(exactly 4 spades)?  
+#####
+P(exactly 2 10's):
+  
+```{r, cache=TRUE}
+set.seed(123)
+# Load necessary packages
+library(parallel)
+
+# Define a function to simulate a 5-card hand
+simulate_hand <- function() {
+  deck <- c(rep("10", 4), rep("Others", 48))  # 4 tens and 48 other cards
+  hand <- sample(deck, 5)  # Draw 5 cards
+  return(hand)
+}
+
+# Define a function to run simulations in parallel
+run_simulation <- function(num_simulations, num_tens_needed) {
+  count_tens <- 0
+  for (i in 1:num_simulations) {
+    hand <- simulate_hand()
+    if (sum(hand == "10") == num_tens_needed) {
+      count_tens <- count_tens + 1
+    }
+  }
+  return(count_tens)
+}
+
+# Detect the number of cores
+num_cores <- detectCores() - 1  # Use one less than the total number of cores
+
+# Create a cluster
+cl <- makeCluster(num_cores)
+
+# Set parameters
+num_simulations <- 10000000  # Number of simulations
+num_tens_needed <- 2         # Exactly 2 tens
+
+# Divide the simulations among the cores
+simulations_per_core <- num_simulations / num_cores
+
+# Export necessary variables and functions to the cluster
+clusterExport(cl, varlist = c("simulate_hand", "run_simulation", "simulations_per_core","num_tens_needed"))
+
+# Run the simulations in parallel
+results <- parLapply(cl, 1:num_cores, function(x) run_simulation(simulations_per_core, num_tens_needed))
+
+# Stop the cluster
+stopCluster(cl)
+
+# Combine the results from all cores
+total_count_tens <- sum(unlist(results))
+
+# Calculate the probability
+probability_tens <- total_count_tens / num_simulations
+
+# Print the results
+cat(paste("Probability of getting exactly 2 tens:", probability_tens))
+```
+
+P(exactly 4 spades):
+```{r}
+set.seed(123)
+num_simulations <- 10000000  # Number of simulations
+num_spades_needed <- 4      # Exactly 4 spades
+
+# Function to simulate a 5-card hand
+simulate_hand <- function() {
+  deck <- c(rep("S", 13), rep("Others", 39))  # 13 spades and 39 other cards
+  hand <- sample(deck, 5)  # Draw 5 cards
+  return(hand)
+}
+# initialize the counters for successes
+count_spades <- 0
+
+# run the simulations
+for (i in 1:num_simulations) {
+  hand <- simulate_hand()
+  if (sum(hand == "S") == num_spades_needed) {
+    count_spades <- count_spades + 1
+  }
+}
+
+probability_spades <- count_spades / num_simulations
+
+# Print results
+cat("Probability of getting exactly 4 spades:", probability_spades, "\n")
+```

@@ -1,0 +1,54 @@
+---
+title: "ECS 132 Quiz 2"
+output: pdf_document
+---
+
+This is the pdf for simulating question 5 from quiz 2.
+
+# Analytical solution:
+P(Z=3) = P(Tails) * P(Z=3 | Tails) + P(Heads) * P(Z=3 | Heads)
+
+       = (1/2) * (1/6) + (1/2) * (1/4)
+
+       = 1/12 + 1/8
+
+       = 2/24 + 3/24
+
+       = 5/24
+
+       = 0.2083333
+
+```{r}
+
+# Set the seed for reproducibility
+set.seed(123)
+
+# Set the parameters
+n_simulations <- 1000000  # Number of simulations
+
+# Function to simulate one game
+simulate_game <- function() {
+  coin_flip <- sample(c("Heads", "Tails"), 1)
+  
+  if (coin_flip == "Tails") {
+    dice_roll <- sample(1:6, 1)
+  } else {
+    # Unfair die with 25% chance of rolling a 3
+    unfair_probs <- c(0.15, 0.15, 0.25, 0.15, 0.15, 0.15)
+    dice_roll <- sample(1:6, 1, prob = unfair_probs)
+  }
+  
+  return(dice_roll == 3)
+}
+
+# Run simulations
+results <- replicate(n_simulations, simulate_game())
+
+# Calculate the probability
+simulated_prob <- mean(results)
+
+# Print the results
+cat("Analytical probability:", 2/24 + 3/24, "\n")
+cat("Simulated probability:", simulated_prob, "\n")
+
+```

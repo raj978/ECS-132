@@ -1,0 +1,39 @@
+---
+title: "Quiz 4 Preparation"
+author: "Rajat Mahesh Gupta"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+#### Problem 3: What is the probability in the bus rider problem of 4 people leaving the bus after bus stop 2?
+
+#### Can you augment the code to test your analytical result, given the code in the book.
+
+```{r, cache=TRUE}
+set.seed(123)
+
+# Number of repetitions and stops
+nreps <- 10000000
+stops <- 2
+count <- 0
+# Define the simulation function
+for (i in 1:nreps) {
+  riders <- 1
+  for (j in 1:stops) {
+    if (riders > 0) {
+      for (k in 1:riders) {
+        if (runif(1) < 0.12) {
+          riders <- riders - 1
+        }
+      }
+    }
+    # New passengers board the bus
+    new_riders <- sample(0:2, 1, prob = c(0.5, 0.4, 0.1))
+    riders <- riders + new_riders
+  }
+  if (riders == 4) count <- count + 1
+}
+
+# Print the result
+cat("The probability of having exactly 4 riders left after bus stop 2 is: ", count / nreps)
+```

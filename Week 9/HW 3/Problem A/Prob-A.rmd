@@ -1,0 +1,98 @@
+---
+title: "Homework 3 - Problem A"
+author: "Rajat Mahesh Gupta"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    latex_engine: xelatex
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{amssymb}
+  - \usepackage[utf8]{inputenc}
+  - \usepackage{fontspec}
+---
+
+Download the DNC e-mail co-recipient dataset from canvas. Here we
+will explore the degree distribution of the resulting graph.
+
+- The format seems to be  
+recip1ID recip2ID nummsgs
+
+- One might treat this as a weighted graph, but we will not do
+so. Ignore the third column.
+
+- The data seems to be duplicated, with (a,b) and (b,a) both
+appearing in the data. This is odd, as the third column
+differs, lets take only the rows in which recip1ID < recip2ID.
+This indeed cuts the data in half.
+
+- Explore how well a power law fits the data, as follows. Let mi
+denote the count of recipients having degree i in the data, i =
+1,2,3,... The form of the pmf (check this!) implies that a plot
+of log(mi) against log(i) should look like a straight line.
+There will be points above and below the line, due to sampling
+variation, but the trend should look linear. Make this plot,
+and comment.
+
+- NOTE: In this and all future work for the course, you must use R
+to generate your graphs. This can be either base R, ggplot2
+(appendix in our book) or lattice.
+
+- Assuming a power law, estimate $\gamma$. (We use the term estimate here
+because the data is only a sample from a population (real or
+conceptual). Use R's lm() function for this. We will study this
+function in detail later, but for instance the following would
+find the intercept and slope of a line fit through the points
+(1,1), (2,2), (3,4):
+```
+> x <- 1:3
+> y <- c(1,2,4)
+> lm(y ~ x)
+```
+
+```{r, cache=TRUE}
+library(ggplot2)
+
+dat <- read.table("/Users/rajat-mahesh-gupta/Documents/csSchool/ECS-132/Week 9/HW 3/Problem A/dnc-corecipient/out.dnc-corecipient", header=TRUE)
+
+# keyword names used to rename the columns
+names(dat) <- c("recip1ID", "recip2ID", "num_messages")
+
+# Removes the duplicate entries where recip1ID < recip2ID
+dat <- dat[dat["recip1ID"] < dat["recip2ID"], ]
+
+# to find the degree of each recipient we call the table function on the column recip1ID
+# table(as.matrix(dat)) would return something like { 1: 3, 2: 5, 3: 1 ... }
+# calling table() again on table(as.matrix(dat)) would count the frequencies of the frequencies giving somehthing like { 1: 7, 2: 3, 3:5 ...}, so There are 7 recipients with a degree of 1
+
+i_mi_dat <- table(table(as.matrix(dat)))
+
+i = as.numeric(names(i_mi_dat))
+mi <- as.vector(i_mi_dat)
+
+data_to_plot <- data.frame(log_i = log(i), log_m_i = log(mi))
+names(data_to_plot) <- c("log_i", "log_m_i")
+
+# plotting
+p <- ggplot(data_to_plot, aes(x=log_i, y=log_m_i)) + geom_point(color="black", alpha=0.8) + labs(title="Plot for Problem", x="log(i)", y="log(m_i)") + theme_light() + geom_smooth(method="lm" , se=FALSE, color=alpha("royalblue3", 0.35), size=3)
+
+plot(p)
+
+# Save the plot
+ggsave("problemA.png")
+```
+
+- Re-do your earlier plot with the fitted line superimposed. Do
+not hard-code the intercept and slope from above; instead, call
+coef() on the object returned by lm()
+
+```{r, cache=TRUE}
+# Print fit coefficients
+linear_fit <- lm(log_m_i ~ log_i, data_to_plot)
+print(coef(linear_fit))
+```
+
+If the degree of a person follows the power law distribution, then we would expect a plot of log(mi) vs. log(i)
+to be a straight line. Figure 1 shows this plot for our dataset. The slope of this line would be $\gamma$. Thus, an
+estimate of $\gamma$ for our data is log_i (from our linear fit coefficient). 
+We can see the graph has a linear trend, but many points are not on the line. This is due to sampling variation - common in real world data.

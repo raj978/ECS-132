@@ -1,0 +1,175 @@
+---
+title: "Homework 2"
+author: "Rajat Mahesh Gupta"
+output: pdf_document
+---
+<!--
+#### Problem 0: You are playing a game at a carnival, the game involves rolling a 3 sided dice where: Rolling a
+- 1 has probability of 0.2
+- 2 has probability of 0.5
+- 4 has probability of 0.3
+
+#### If you land on the dice face 2, you get to flip a fair coin otherwise you will flip an unfair coin such that P(Tails)=.30 Let X be a random variable that represents the number of dots you see on a face of the dice, and Y be an indicator variable on whether the coin shows a head when flipped.
+#### Find var(X+4Y)
+
+```{r, cache=TRUE}
+set.seed(123)
+
+n <- 10000000
+
+dice_rolls <- sample(c(1, 2, 4), size = n, replace = TRUE, prob = c(0.2, 0.5, 0.3))
+
+# Simulate coin flips based on dice rolls
+coin_flips <- sapply(dice_rolls, function(x) {
+  if (x == 2) {
+    # Fair coin flip
+    sample(c(0, 1), size = 1, replace = TRUE, prob = c(0.5, 0.5))
+  } else {
+    # Unfair coin flip
+    sample(c(0, 1), size = 1, replace = TRUE, prob = c(0.3, 0.7))
+  }
+})
+
+# Calculate X + 4Y
+X_plus_4Y <- dice_rolls + 4 * coin_flips
+
+# Calculate the variance of X + 4Y
+variance_X_plus_4Y <- var(X_plus_4Y)
+
+# Print the result
+cat("var[X+4Y] = ", variance_X_plus_4Y)
+```
+-->
+Problem 1: Consider the bus ridership example. Intuitively, $L_1$ and $L_2$ are not independet, show that $var(L_1-L_2)$ does not equal $var(L_1)+var(L_2)$. Determine the difference. (Find the 3 variances using simulation)
+---
+
+$L_i$ = # of passengers on the bus as it leaves stop i
+
+$B_i$ = # of passengers boarding at stop i
+
+P(leave) = 0.2 |
+B(0) = 0.5 |
+B(1) = 0.4 |
+B(2) = 0.1
+
+```{r, cache=TRUE}
+set.seed(123)
+nreps <- 10000000
+nstops <- 2
+
+# Simulate the number of riders at each stop
+riders_at_stop <- matrix(0, nrow = nreps, ncol = nstops)
+
+for (i in 1:nreps) {
+  riders <- 0
+  for (j in 1:nstops) {
+    if (riders > 0) {
+      for (k in 1:riders) {
+        if (runif(1) < 0.2) {
+          riders <- riders - 1
+        }
+      }
+    }
+    new_riders <- sample(0:2, 1, prob = c(0.5, 0.4, 0.1))
+    riders <- riders + new_riders
+    riders_at_stop[i, j] <- riders
+  }
+}
+
+# Calculate the variances
+var_L1 <- var(riders_at_stop[, 1])
+var_L2 <- var(riders_at_stop[, 2])
+var_L1_minus_L2 <- var(riders_at_stop[, 1] - riders_at_stop[, 2])
+cov_L1_L2 <- cov(riders_at_stop[, 1], riders_at_stop[, 2])
+
+# Print the results
+cat("var(L1) = ", var_L1, "\n")
+cat("var(L2) = ", var_L2, "\n")
+cat("var(L1 - L2) = ", var_L1_minus_L2, "\n")
+cat("var(L1) + var(L2) = ", var_L1 + var_L2, "\n")
+cat("cov(L1, L2) = ", cov_L1_L2, "\n")
+cat("Difference = ", var_L1_minus_L2 - (var_L1 + var_L2), "which is twice the negative of the covariance\n")
+```
+<!--
+#### Problem 2 : The game is to toss a coin until we get r consecutive heads or reach a total of s tosses, whichever comes first.
+#### Let X denote the number of tosses we make. We win $X. Find the minimum fee that should be charged for this game if r = 4 and s = 7. 
+
+---
+
+```{r, cache=TRUE}
+set.seed(123)
+r <- 4
+s <- 7
+nreps <- 10000000
+
+simulate_game <- function() {
+  consecutive_heads <- 0
+  tosses <- 0
+  
+  while (consecutive_heads < r && tosses < s) {
+    toss <- sample(c(0, 1), size = 1, prob = c(0.5, 0.5))
+    tosses <- tosses + 1
+    if (toss == 1) {
+      consecutive_heads <- consecutive_heads + 1
+    } else {
+      consecutive_heads <- 0
+    }
+  }
+  
+  return(tosses)
+}
+
+results <- replicate(nreps, simulate_game())
+expected_winnings <- mean(results)
+
+cat("Minimum fee to be charged for the game: $", expected_winnings, "\n")
+```
+
+#### Problem 4: Let x be a random variable that denotes the sum of the values on a roll of 2 dice (8 sided dice with equal prob of getting any face (1-7)) 
+1. What is the expected value of x?
+
+```{r, cache=TRUE}
+set.seed(123)
+
+nreps <- 10000000
+
+# Simulate rolling two 8-sided dice
+dice_rolls <- replicate(nreps, sum(sample(1:8, size = 2, replace = TRUE)))
+
+# Calculate the expected value of the sum of the dice rolls
+expected_value <- mean(dice_rolls)
+
+# Print the result
+cat("Expected value of X (sum of two 8-sided dice) = ", expected_value, "\n")
+```
+
+```{r, cache=TRUE, include=FALSE}
+set.seed(123)
+r <- 2
+s <- 5
+p_heads <- 0.09
+nreps <- 10000000
+
+simulate_game <- function() {
+  consecutive_heads <- 0
+  tosses <- 0
+  
+  while (consecutive_heads < r && tosses < s) {
+    toss <- sample(c(0, 1), size = 1, prob = c(1 - p_heads, p_heads))
+    tosses <- tosses + 1
+    if (toss == 1) {
+      consecutive_heads <- consecutive_heads + 1
+    } else {
+      consecutive_heads <- 0
+    }
+  }
+  
+  return(tosses)
+}
+
+results <- replicate(nreps, simulate_game())
+average_tosses <- mean(results)
+
+cat("Average number of tosses until the game is stopped: ", average_tosses, "\n")
+``` 
+-->
